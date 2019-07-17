@@ -3,6 +3,7 @@
     require_once 'package/skill.php';
     require_once 'package/player.php';
     require_once 'package/computer.php';
+    require_once 'package/QTE.php';
     
     echo "loading.....\n";
     echo "停机信号插拴抽出完毕.....\n";
@@ -21,7 +22,7 @@
     echo "GAME START\n";
     $MAX_HP = 5;
     $MIN_HP = 1;
-    //技能1 集能 
+    //技能1 集能
     $skill1 = new skill();
     $skill1->setCost(0);
     $skill1->setDamage(0);
@@ -116,33 +117,55 @@
     //设置电脑姓名
     $computer->setName('电脑');
     //初始5格血量
-    $computer->setHP($MAX_HP);
+    $computer->setHP(0);
     //初始0格能量
     $computer->setMP(0);
     //设置初始技能
     $computer->setSkill($attackSkillList);
-    
+
     //计算回合数
     $roundTime = 1;
+
+    //创建QTE对象
+    $qteObject = new QTE();
+    $qteObject->setQteTime(10);//十秒
+    $qteObject->setQteLen(8);//长度
+    $qteObject->makeQteString();//生成QTE字符串
+
+
     //模拟战斗开始
-    while (true){
+    while (true) {
         echo "第{$roundTime}轮开始: \n";
         echo "请输入本轮的技能指令 \n";
         $AIskill = AI($computer, $MAX_HP, $MIN_HP, $returningSkillList, []);
         //玩家的操作
-        $handle = fopen ("php://stdin","r");
+        $handle = fopen("php://stdin", "r");
         $action = fgets($handle);
         $playSkill = player($action, $player);
         battle($player, $playSkill, $computer, $AIskill);
 
         echo "{$player->getName()} 使用 {$playSkill->getName()}, 造成 {$playSkill->getDamage()}点伤害 \n";
-        echo "玩家{$player->getName()},目前血量:{$player->getHP()}, 目前MP:{$player->getMP()}点 \n";
         echo "{$computer->getName()} 使用 {$AIskill->getName()}, 造成 {$AIskill->getDamage()}点伤害 \n";
-        echo "AI{$computer->getName()},目前血量:{$computer->getHP()}, 目前MP:{$computer->getMP()}点 \n";
-        
-
-        if($roundTime >= 10){
-            die();
+        echo "{$player->getName()},目前血量:{$player->getHP()}, 目前MP:{$player->getMP()}点 \n";
+        echo "{$computer->getName()},目前血量:{$computer->getHP()}, 目前MP:{$computer->getMP()}点 \n";
+        if ($player->getHP() <= 0) {
+            echo "{$player->getName()} 倒下了\n";
+            exit;
+        }
+        if ($computer->getHP() <= 0) {
+            //进入QTE模式
+            
+            echo "请输入以下指令完成处决 {$qteObject->getQteHint()}\n";
+            $qteHandle = fopen("php://stdin", "r");
+            $qteAction = strtolower(trim(fgets($qteHandle)));
+            $qteResult = $qteObject->checkQteString($qteObject->getQteAsc2(), $qteAction);
+            if ($qteResult) {
+                echo "QTE成功{$computer->getName()}, 倒下了 \n";
+                exit;
+            } else {
+                echo "QTE失败{$computer->getName()}复活,并回复3点血量 \n";
+                $computer->setHP(3);
+            }
         }
         $roundTime ++;
     }
@@ -151,8 +174,8 @@
     function player($action, $player)
     {
         $currentRoundSkill = null;
-        foreach($player->getSkill() as $skill){
-            if(strtoupper(trim($action)) == $skill->getShortCut()){
+        foreach ($player->getSkill() as $skill) {
+            if (strtoupper(trim($action)) == $skill->getShortCut()) {
                 $currentRoundSkill = $skill;
                 break;
             }
@@ -163,30 +186,30 @@
     //计算电脑每轮的行动
     function AI($computer, $MAX_HP, $MIN_HP, $returningSkillList, $guardSkillList)
     {
-        $mp = $computer->getMp();
-        $hp = $computer->getHp();
+        $mp = $computer->getMP();
+        $hp = $computer->getHP();
         //一开始电脑只会有攻击技能
         $skillList = $computer->getSkill();
         //设置变量用于存储目前能量值所能使用的技能
         $useSkillList = [];
         //遍历电脑掌握的所有技能
-        foreach($skillList as $skill){
+        foreach ($skillList as $skill) {
             //找出使用费用低于当前能量的技能放入可用技能列表中
-            if($skill->getCost() <= $mp){
+            if ($skill->getCost() <= $mp) {
                 array_push($useSkillList, $skill);
             }
         }
         //如果发生扣血的情况下，电脑技能自动追加补血和格挡技能
-        if($hp < $MAX_HP && $hp > $MIN_HP){
+        if ($hp < $MAX_HP && $hp > $MIN_HP) {
             $neoSkillList = array_merge($returningSkillList, $guardSkillList);
-            foreach($neoSkillList as $skill){
-                if($skill->getCost() <= $mp){
+            foreach ($neoSkillList as $skill) {
+                if ($skill->getCost() <= $mp) {
                     array_push($useSkillList, $skill);
                 }
             }
-        }else{//如果血量已经到达最低生命值时,则放弃进行防御（防御自扣1血）
-            foreach($returningSkillList as $skill){
-                if($skill->getCost() <= $mp){
+        } else {//如果血量已经到达最低生命值时,则放弃进行防御（防御自扣1血）
+            foreach ($returningSkillList as $skill) {
+                if ($skill->getCost() <= $mp) {
                     array_push($useSkillList, $skill);
                 }
             }
@@ -206,7 +229,6 @@
         //各自结算释放技能对对方的伤害
         $player = skillOtherEffected($player, $cpuSkill);
         $computer = skillOtherEffected($computer, $playSkill);
-
     }
 
     //计算技能对自己产生的影响
@@ -217,11 +239,11 @@
         $effectedType = $skill->getGainType();
         $gain = $skill->getGain();
         //表示本次受影响的字段为hp
-        if($effectedType == 'HP'){
-           $effectedVal = $originHp + $gain;
+        if ($effectedType == 'HP') {
+            $effectedVal = $originHp + $gain;
            
-           $target->setHP($effectedVal);
-        }else if($effectedType == 'MP'){
+            $target->setHP($effectedVal);
+        } elseif ($effectedType == 'MP') {
             //本次受影响的为MP字段
             $effectedVal = $originMp + $gain;
             $target->setMP($effectedVal);
@@ -243,4 +265,3 @@
 
         return $target;
     }
-    
