@@ -5,6 +5,7 @@ class skill
     const CHARGE_TYPE = 'CHARGE';
     const RECOVER_TYPE = 'RECOVER';
     const GUARD_TYPE = 'GUARD';
+    const MIRROR_TYPE = 'MIRROR';
     
     //消耗
     private $cost;

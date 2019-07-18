@@ -85,13 +85,13 @@
 
     //技能7 格挡
     $skill7 = new skill();
-    $skill7->setCost(0);
+    $skill7->setCost(3);
     $skill7->setDamage(0);
     $skill7->setGain(0);
     $skill7->setGainType('HP');
-    $skill7->setName('格挡');
+    $skill7->setName('神圣防护罩-反射镜力');
     $skill7->setShortCut('G');
-    $skill7->setType(skill::GUARD_TYPE);
+    $skill7->setType(skill::MIRROR_TYPE);
     
     
     $skillList = [
@@ -144,7 +144,7 @@
     while (true) {
         echo "第{$roundTime}轮开始: \n";
         echo "请输入本轮的技能指令 \n";
-        $AIskill = AI($computer, $MAX_HP, $MIN_HP, $returningSkillList, []);
+        $AIskill = AI($computer, $MAX_HP, $MIN_HP, $returningSkillList, $guardSkillList);
         //玩家的操作
         $handle = fopen("php://stdin", "r");
         $action = fgets($handle);
@@ -276,11 +276,19 @@
         if($userSkill->getType() == skill::ATTACK_TYPE && $anotherSkill->getType() == skill::ATTACK_TYPE){
             //计算招式互相对拼后的伤害
             $absDamage = abs($userDamage - $anotherDamage);
-            //我方招式并没有拼过对方招式
+            //己方招式并没有拼过对方招式
             if($userDamage < $anotherDamage){
                 $currentHp = $playerHp - $absDamage;
                 $currentUser->setHP($currentHp);
             }
+        }else if($userSkill->getType() == skill::MIRROR_TYPE){
+            //以下为反射逻辑
+            //己方使用反射能力则可以不扣血量
+            $currentUser->setHP($playerHp);
+        }else if($anotherSkill->getType() == skill::MIRROR_TYPE){
+            //对方释放反射能力
+            $currentHp = $playerHp - $userDamage;
+            $currentUser->setHP($currentHp);
         }else{
             $currentHp = $playerHp - $anotherDamage;
             $currentUser->setHP($currentHp);
