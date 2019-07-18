@@ -1,6 +1,7 @@
 <?php
 class skill
 {
+    const FAULT_TYPE = 'FAULT';
     const ATTACK_TYPE = 'ATTACK';
     const CHARGE_TYPE = 'CHARGE';
     const RECOVER_TYPE = 'RECOVER';

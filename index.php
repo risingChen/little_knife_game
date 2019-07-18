@@ -22,6 +22,17 @@
     echo "GAME START\n";
     $MAX_HP = 3;
     $MIN_HP = 1;
+
+    //技能0 发呆
+    $faultSkill = new skill();
+    $faultSkill->setCost(0);
+    $faultSkill->setDamage(0);
+    $faultSkill->setGain(0);
+    $faultSkill->setGainType('HP');
+    $faultSkill->setName('发呆');
+    $faultSkill->setShortCut('FAULT');
+    $faultSkill->setType(skill::FAULT_TYPE);
+
     //技能1 集能
     $skill1 = new skill();
     $skill1->setCost(0);
@@ -158,7 +169,7 @@
         //玩家的操作
         $handle = fopen("php://stdin", "r");
         $action = fgets($handle);
-        $playSkill = player($action, $player);
+        $playSkill = player($action, $player, $faultSkill);
         battle($player, $playSkill, $computer, $AIskill);
 
         echo "{$player->getName()} 使用 {$playSkill->getName()}, 造成 {$playSkill->getDamage()}点伤害 \n";
@@ -188,7 +199,7 @@
     }
 
     //计算玩家的每轮行动
-    function player($action, $player)
+    function player($action, $player, $faultSkill)
     {
         $currentRoundSkill = null;
         foreach ($player->getSkill() as $skill) {
@@ -197,7 +208,7 @@
                 break;
             }
         }
-        return $currentRoundSkill;
+        return  is_null($currentRoundSkill) ? $faultSkill : $currentRoundSkill;
     }
     
     //计算电脑每轮的行动
