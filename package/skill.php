@@ -1,6 +1,10 @@
 <?php
 class skill
 {
+    const ATTACK_TYPE = 'ATTACK';
+    const CHARGE_TYPE = 'CHARGE';
+    const RECOVER_TYPE = 'RECOVER';
+    const GUARD_TYPE = 'GUARD';
     
     //消耗
     private $cost;
@@ -19,6 +23,9 @@ class skill
     
     //技能缩写;
     private $shortCut;
+
+    //技能类型;
+    private $type;
     
     public function getCost()
     {
@@ -78,5 +85,17 @@ class skill
     public function setShortCut($shortCut)
     {
         $this->shortCut = $shortCut;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
     }
 }

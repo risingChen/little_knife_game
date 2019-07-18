@@ -20,7 +20,7 @@
     echo "内部电源充电完毕.....\n";
     echo "WELCOME TO THE VERSUS GAME\n";
     echo "GAME START\n";
-    $MAX_HP = 5;
+    $MAX_HP = 3;
     $MIN_HP = 1;
     //技能1 集能
     $skill1 = new skill();
@@ -30,6 +30,7 @@
     $skill1->setGainType('MP');
     $skill1->setName('充能');
     $skill1->setShortCut('C');
+    $skill1->setType(skill::CHARGE_TYPE);
     
     //技能2 手里剑 伤害1 所需能量1
     $skill2 = new skill();
@@ -39,6 +40,7 @@
     $skill2->setGainType('HP');
     $skill2->setName('手里剑');
     $skill2->setShortCut('K');
+    $skill2->setType(skill::ATTACK_TYPE);
     
     //技能3 风魔手里剑 伤害2 所需能量2
     $skill3 = new skill();
@@ -48,6 +50,7 @@
     $skill3->setGainType('HP');
     $skill3->setName('风魔手里剑');
     $skill3->setShortCut('F');
+    $skill3->setType(skill::ATTACK_TYPE);
     
     
     //技能4 风雷震落 伤害3 所需能量3
@@ -58,6 +61,7 @@
     $skill4->setGainType('HP');
     $skill4->setName('风雷震落');
     $skill4->setShortCut('R');
+    $skill4->setType(skill::ATTACK_TYPE);
     
     //技能5 奶  回复1 所需能量1
     $skill5 = new skill();
@@ -67,6 +71,7 @@
     $skill5->setGainType('HP');
     $skill5->setName('治疗');
     $skill5->setShortCut('M');
+    $skill5->setType(skill::RECOVER_TYPE);
     
     //技能6 死者苏生 回复5 所需能量5
     $skill6 = new skill();
@@ -76,7 +81,8 @@
     $skill6->setGainType('HP');
     $skill6->setName('死者苏生');
     $skill6->setShortCut('S');
-    
+    $skill6->setType(skill::RECOVER_TYPE);
+
     //技能7 格挡
     $skill7 = new skill();
     $skill7->setCost(0);
@@ -85,6 +91,7 @@
     $skill7->setGainType('HP');
     $skill7->setName('格挡');
     $skill7->setShortCut('G');
+    $skill7->setType(skill::GUARD_TYPE);
     
     
     $skillList = [
@@ -117,7 +124,7 @@
     //设置电脑姓名
     $computer->setName('电脑');
     //初始5格血量
-    $computer->setHP(0);
+    $computer->setHP($MAX_HP);
     //初始0格能量
     $computer->setMP(0);
     //设置初始技能
@@ -227,8 +234,8 @@
         $player = skillSelfEffected($player, $playSkill);
         $computer = skillSelfEffected($computer, $cpuSkill);
         //各自结算释放技能对对方的伤害
-        $player = skillOtherEffected($player, $cpuSkill);
-        $computer = skillOtherEffected($computer, $playSkill);
+        $player = skillEachEffected($player, $playSkill, $cpuSkill);
+        $computer = skillEachEffected($computer, $cpuSkill, $playSkill);
     }
 
     //计算技能对自己产生的影响
@@ -255,13 +262,29 @@
         return $target;
     }
 
-    //计算技能对对方产生的影响
-    function skillOtherEffected($target, $skill)
+    //计算技能对双方产生的影响
+    function skillEachEffected($currentUser, $userSkill, $anotherSkill)
     {
-        $originHp = $target->getHP();
-        $damage = $skill->getDamage();
-        $currentHp = $originHp - $damage;
-        $target->setHP($currentHp);
+        $playerHp = $currentUser->getHP();
+        
+        //己方技能的伤害
+        $userDamage = $userSkill->getDamage();
+        //对方技能的伤害
+        $anotherDamage = $anotherSkill->getDamage();
+        
+        //如果对方释放技能和己方释放技能均为攻击性技能，则进入拼招模式
+        if($userSkill->getType() == skill::ATTACK_TYPE && $anotherSkill->getType() == skill::ATTACK_TYPE){
+            //计算招式互相对拼后的伤害
+            $absDamage = abs($userDamage - $anotherDamage);
+            //我方招式并没有拼过对方招式
+            if($userDamage < $anotherDamage){
+                $currentHp = $playerHp - $absDamage;
+                $currentUser->setHP($currentHp);
+            }
+        }else{
+            $currentHp = $playerHp - $anotherDamage;
+            $currentUser->setHP($currentHp);
+        }
 
-        return $target;
+        return $currentUser;
     }
