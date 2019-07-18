@@ -119,13 +119,13 @@
         $skill1, $skill2, $skill3, $skill4, $skill5, $skill6, $skill7, $skill8
     ];
     $attackSkillList = [
-        $skill1, $skill2, $skill3, $skill4
+        $skill1, $skill2, $skill3, $skill4, $skill8
     ];
     $returningSkillList = [
         $skill5, $skill6
     ];
     $guardSkillList = [
-        $skill7, $skill8
+        $skill7
     ];
     
     
