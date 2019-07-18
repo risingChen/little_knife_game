@@ -6,6 +6,7 @@ class skill
     const RECOVER_TYPE = 'RECOVER';
     const GUARD_TYPE = 'GUARD';
     const MIRROR_TYPE = 'MIRROR';
+    const MISSING_TYPE = 'MISSING';
     
     //消耗
     private $cost;

@@ -92,10 +92,20 @@
     $skill7->setName('神圣防护罩-反射镜力');
     $skill7->setShortCut('G');
     $skill7->setType(skill::MIRROR_TYPE);
+
+    //技能7 闪避
+    $skill8 = new skill();
+    $skill8->setCost(1);
+    $skill8->setDamage(0);
+    $skill7->setGain(0);
+    $skill8->setGainType('HP');
+    $skill8->setName('闪避');
+    $skill8->setShortCut('D');
+    $skill8->setType(skill::MISSING_TYPE);
     
     
     $skillList = [
-        $skill1, $skill2, $skill3, $skill4, $skill5, $skill6, $skill7
+        $skill1, $skill2, $skill3, $skill4, $skill5, $skill6, $skill7, $skill8
     ];
     $attackSkillList = [
         $skill1, $skill2, $skill3, $skill4
@@ -104,7 +114,7 @@
         $skill5, $skill6
     ];
     $guardSkillList = [
-        $skill7,
+        $skill7, $skill8
     ];
     
     
@@ -281,6 +291,10 @@
                 $currentHp = $playerHp - $absDamage;
                 $currentUser->setHP($currentHp);
             }
+        }else if($userSkill->getType() == skill::MISSING_TYPE){
+            //以下为闪避逻辑
+            //己方使用闪避则可以不扣血
+            $currentUser->setHP($playerHp);
         }else if($userSkill->getType() == skill::MIRROR_TYPE){
             //以下为反射逻辑
             //己方使用反射能力则可以不扣血量
