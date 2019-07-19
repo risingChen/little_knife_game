@@ -1,9 +1,10 @@
 <?php
     exec("CHCP 65001");
-    require_once 'package/skill.php';
-    require_once 'package/player.php';
-    require_once 'package/computer.php';
-    require_once 'package/QTE.php';
+    require_once './package/skill.php';
+    require_once './package/player.php';
+    require_once './package/computer.php';
+    require_once './package/QTE.php';
+    require_once './makeSkill.php';
     
     echo "loading.....\n";
     echo "停机信号插拴抽出完毕.....\n";
@@ -22,100 +23,8 @@
     echo "GAME START\n";
     $MAX_HP = 3;
     $MIN_HP = 1;
-
-    //技能0 发呆
-    $faultSkill = new skill();
-    $faultSkill->setCost(0);
-    $faultSkill->setDamage(0);
-    $faultSkill->setGain(0);
-    $faultSkill->setGainType('HP');
-    $faultSkill->setName('发呆');
-    $faultSkill->setShortCut('FAULT');
-    $faultSkill->setType(skill::FAULT_TYPE);
-
-    //技能1 集能
-    $skill1 = new skill();
-    $skill1->setCost(0);
-    $skill1->setDamage(0);
-    $skill1->setGain(1);
-    $skill1->setGainType('MP');
-    $skill1->setName('充能');
-    $skill1->setShortCut('C');
-    $skill1->setType(skill::CHARGE_TYPE);
     
-    //技能2 手里剑 伤害1 所需能量1
-    $skill2 = new skill();
-    $skill2->setCost(1);
-    $skill2->setDamage(1);
-    $skill2->setGain(0);
-    $skill2->setGainType('HP');
-    $skill2->setName('手里剑');
-    $skill2->setShortCut('K');
-    $skill2->setType(skill::ATTACK_TYPE);
-    
-    //技能3 风魔手里剑 伤害2 所需能量2
-    $skill3 = new skill();
-    $skill3->setCost(2);
-    $skill3->setDamage(2);
-    $skill3->setGain(0);
-    $skill3->setGainType('HP');
-    $skill3->setName('风魔手里剑');
-    $skill3->setShortCut('F');
-    $skill3->setType(skill::ATTACK_TYPE);
-    
-    
-    //技能4 风雷震落 伤害3 所需能量3
-    $skill4 = new skill();
-    $skill4->setCost(3);
-    $skill4->setDamage(3);
-    $skill4->setGain(0);
-    $skill4->setGainType('HP');
-    $skill4->setName('风雷震落');
-    $skill4->setShortCut('R');
-    $skill4->setType(skill::ATTACK_TYPE);
-    
-    //技能5 奶  回复1 所需能量1
-    $skill5 = new skill();
-    $skill5->setCost(1);
-    $skill5->setDamage(0);
-    $skill5->setGain(1);
-    $skill5->setGainType('HP');
-    $skill5->setName('治疗');
-    $skill5->setShortCut('M');
-    $skill5->setType(skill::RECOVER_TYPE);
-    
-    //技能6 死者苏生 回复5 所需能量5
-    $skill6 = new skill();
-    $skill6->setCost(5);
-    $skill6->setDamage(0);
-    $skill6->setGain(5);
-    $skill6->setGainType('HP');
-    $skill6->setName('死者苏生');
-    $skill6->setShortCut('S');
-    $skill6->setType(skill::RECOVER_TYPE);
-
-    //技能7 格挡
-    $skill7 = new skill();
-    $skill7->setCost(3);
-    $skill7->setDamage(0);
-    $skill7->setGain(0);
-    $skill7->setGainType('HP');
-    $skill7->setName('神圣防护罩-反射镜力');
-    $skill7->setShortCut('G');
-    $skill7->setType(skill::MIRROR_TYPE);
-
-    //技能7 闪避
-    $skill8 = new skill();
-    $skill8->setCost(1);
-    $skill8->setDamage(0);
-    $skill7->setGain(0);
-    $skill8->setGainType('HP');
-    $skill8->setName('闪避');
-    $skill8->setShortCut('D');
-    $skill8->setType(skill::MISSING_TYPE);
-    
-    
-    $skillList = [
+    $playSkillList = [
         $skill1, $skill2, $skill3, $skill4, $skill5, $skill6, $skill7, $skill8
     ];
     $attackSkillList = [
@@ -138,7 +47,7 @@
     //初始0格能量
     $player->setMP(0);
     //设置初始技能
-    $player->setSkill($skillList);
+    $player->setSkill($playSkillList);
     
     //创建对手
     $computer = new computer();
@@ -156,7 +65,7 @@
 
     //创建QTE对象
     $qteObject = new QTE();
-    $qteObject->setQteTime(10);//十秒
+    $qteObject->setQteTime(3);//十秒
     $qteObject->setQteLen(8);//长度
     $qteObject->makeQteString();//生成QTE字符串
 
@@ -171,7 +80,6 @@
         $action = fgets($handle);
         $playSkill = player($action, $player, $faultSkill);
         battle($player, $playSkill, $computer, $AIskill);
-
         echo "{$player->getName()} 使用 {$playSkill->getName()}, 造成 {$playSkill->getDamage()}点伤害 \n";
         echo "{$computer->getName()} 使用 {$AIskill->getName()}, 造成 {$AIskill->getDamage()}点伤害 \n";
         echo "{$player->getName()},目前血量:{$player->getHP()}, 目前MP:{$player->getMP()}点 \n";
@@ -231,12 +139,6 @@
         if ($hp < $MAX_HP && $hp > $MIN_HP) {
             $neoSkillList = array_merge($returningSkillList, $guardSkillList);
             foreach ($neoSkillList as $skill) {
-                if ($skill->getCost() <= $mp) {
-                    array_push($useSkillList, $skill);
-                }
-            }
-        } else {//如果血量已经到达最低生命值时,则放弃进行防御（防御自扣1血）
-            foreach ($returningSkillList as $skill) {
                 if ($skill->getCost() <= $mp) {
                     array_push($useSkillList, $skill);
                 }

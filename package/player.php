@@ -1,14 +1,17 @@
 <?php
 class player
 {
+    //姓名
     private $name;
-    
+    //血量
     private $HP;
-    
+    //能量
     private $MP;
-    
+    //技能
     private $skill;
-    
+    //形态
+    private $form;
+
     public function getHP()
     {
         return $this->HP;
@@ -47,5 +50,17 @@ class player
     public function setName($name)
     {
         $this->name = $name;
+    }
+    
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    public function setForm($form)
+    {
+        $this->form = $form;
+
+        return $this;
     }
 }
