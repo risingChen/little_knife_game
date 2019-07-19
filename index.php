@@ -4,8 +4,9 @@
     require_once './package/player.php';
     require_once './package/computer.php';
     require_once './package/QTE.php';
+    require_once './package/form.php';
     require_once './makeSkill.php';
-    
+
     echo "loading.....\n";
     echo "停机信号插拴抽出完毕.....\n";
     echo "神经结合系统完成.....\n";
@@ -23,7 +24,7 @@
     echo "GAME START\n";
     $MAX_HP = 3;
     $MIN_HP = 1;
-    
+
     $playSkillList = [
         $skill1, $skill2, $skill3, $skill4, $skill5, $skill6, $skill7, $skill8
     ];
@@ -37,6 +38,30 @@
         $skill7
     ];
     
+    $riderKick = new skill();
+    $riderKick->setCost(10);
+    $riderKick->setDamage(20);
+    $riderKick->setGain(0);
+    $riderKick->setGainType('MP');
+    $riderKick->setName('rider kick');
+    $riderKick->setShortCut('RK');
+    $riderKick->setType(skill::ATTACK_TYPE);
+
+    $form1 = new form();
+    //形态名称
+    $form1->setFormName('变身');
+    //设置转换形态所需要消耗的能量值
+    $form1->setFormCostMp(3);
+    //设置形态的基础血量
+    $form1->setFormHP(5);
+    //设置形态的基础能量值
+    $form1->setFormMP(2);
+    //待定
+    $form1->setPassive();
+    //设置形态的超必杀
+    $form1->setOT($riderKick);
+    //设置形态快捷键
+    $from1->setShortCut('HS');
     
     //创建玩家
     $player = new player();
@@ -48,6 +73,8 @@
     $player->setMP(0);
     //设置初始技能
     $player->setSkill($playSkillList);
+    //为玩家设定变身形态
+    $player->setForm($form1);
     
     //创建对手
     $computer = new computer();
@@ -79,6 +106,7 @@
         $handle = fopen("php://stdin", "r");
         $action = fgets($handle);
         $playSkill = player($action, $player, $faultSkill);
+        $player = HenShin($action, $player);
         battle($player, $playSkill, $computer, $AIskill);
         echo "{$player->getName()} 使用 {$playSkill->getName()}, 造成 {$playSkill->getDamage()}点伤害 \n";
         echo "{$computer->getName()} 使用 {$AIskill->getName()}, 造成 {$AIskill->getDamage()}点伤害 \n";
@@ -106,13 +134,31 @@
         $roundTime ++;
     }
 
-    //计算玩家的每轮行动
+    //计算角色的形态转换
+    function HenShin($action, $currentUser)
+    {
+        $command = strtoupper(trim($action));
+        //玩家确认使用状态变化
+        if($command == $currentUser->getForm()->getShortCut()){
+            //所属能量满足形态变化所需的能量
+            if($currentUser->getMP() >= $currentUser->getForm()->getFormCostMp()){
+                //将转换形态后的数值覆盖至原来数值
+                $currentUser->setHP($currentUser->getForm()->getFormHP());
+                $currentUser->setMP($currentUser->getForm()->getFormMP());
+                echo "{$currentUser->getName()} 使用 {$currentUser->getForm()->getFormName()} \n";
+            }    
+        }
+        return $currentUser;
+    }
+
+    //计算玩家的每轮所使用的技能
     function player($action, $player, $faultSkill)
     {
+        $command = strtoupper(trim($action));
         $currentRoundSkill = null;
         foreach ($player->getSkill() as $skill) {
-            if (strtoupper(trim($action)) == $skill->getShortCut()) {
-                $currentRoundSkill = $skill;
+            if ($command == $skill->getShortCut()) {
+                 $currentRoundSkill = $skill;
                 break;
             }
         }

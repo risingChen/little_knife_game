@@ -13,6 +13,8 @@ class form{
     private $passive;
     //形态专属大技能
     private $OT;
+    //形态指令
+    private $shortCut;
 
     /**
      * Get the value of formName
@@ -130,6 +132,26 @@ class form{
     public function setOT($OT)
     {
         $this->OT = $OT;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of shortCut
+     */ 
+    public function getShortCut()
+    {
+        return $this->shortCut;
+    }
+
+    /**
+     * Set the value of shortCut
+     *
+     * @return  self
+     */ 
+    public function setShortCut($shortCut)
+    {
+        $this->shortCut = $shortCut;
 
         return $this;
     }

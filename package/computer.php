@@ -8,6 +8,8 @@ class computer
     
     private $skill;
     
+    private $form;
+    
     public function getHP()
     {
         return $this->HP;
@@ -46,5 +48,17 @@ class computer
     public function setName($name)
     {
         $this->name = $name;
+    }
+
+    public function getForm()
+    {
+        return $this->form;
+    }
+
+    public function setForm($form)
+    {
+        $this->form = $form;
+
+        return $this;
     }
 }
