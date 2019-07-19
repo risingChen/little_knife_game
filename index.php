@@ -7,21 +7,32 @@
     require_once './package/form.php';
     require_once './makeSkill.php';
 
-    echo "loading.....\n";
-    echo "停机信号插拴抽出完毕.....\n";
-    echo "神经结合系统完成.....\n";
-    echo "开始第一次接触.....\n";
-    echo "主电源接续动力传达至所有回路.....\n";
-    echo "进入第二次接触.....\n";
-    echo "A10神经接续无异常.....\n";
-    echo "思考形态改为中文.....\n";
-    echo "双向回路开启.....\n";
-    echo "第一固定器解除.....\n";
-    echo "第二固定器解除.....\n";
-    echo "从1号到15号安全装置解除.....\n";
-    echo "内部电源充电完毕.....\n";
-    echo "WELCOME TO THE VERSUS GAME\n";
-    echo "GAME START\n";
+    $openingStr = [
+        "loading.....\n",
+        "停机信号插拴抽出完毕.....\n",
+        "神经结合系统完成.....\n",
+        "开始第一次接触.....\n",
+        "主电源接续动力传达至所有回路.....\n",
+        "进入第二次接触.....\n",
+        "A10神经接续无异常.....\n",
+        "思考形态改为中文.....\n",
+        "双向回路开启.....\n",
+        "第一固定器解除.....\n",
+        "第二固定器解除.....\n",
+        "从1号到15号安全装置解除.....\n",
+        "内部电源充电完毕.....\n",
+        "WELCOME TO THE VERSUS GAME\n",
+        "GAME START\n"
+    ];
+    foreach($openingStr as $openStr){
+        $chineseStrLen = preg_split('/(?<!^)(?!$)/u' , $openStr);
+        foreach($chineseStrLen as $str){
+            echo $str;
+            $randDomSleep = 100000;
+            usleep($randDomSleep);
+        }
+    }
+    
     $MAX_HP = 3;
     $MIN_HP = 1;
 
@@ -57,11 +68,11 @@
     //设置形态的基础能量值
     $form1->setFormMP(2);
     //待定
-    $form1->setPassive();
+    $form1->setPassive('');
     //设置形态的超必杀
     $form1->setOT($riderKick);
     //设置形态快捷键
-    $from1->setShortCut('HS');
+    $form1->setShortCut('HS');
     
     //创建玩家
     $player = new player();
